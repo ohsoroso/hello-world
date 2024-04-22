@@ -46,6 +46,7 @@ pipeline {
                 }
             }
         }
+    } // This closing brace was missing, causing the issue
 
     post {
         success {
