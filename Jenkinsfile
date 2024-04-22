@@ -41,9 +41,6 @@ pipeline {
         stage('Deploy to Minikube') {
             steps {
                 script {
-                    // Store the Docker environment configuration script from Minikube in a variable
-                    bat script: 'minikube -p minikube docker-env --shell powershell > minikube_docker_env.ps1', returnStdout: false
-
                     // Execute the Docker environment configuration script
                     bat 'powershell -File minikube_docker_env.ps1'
 
@@ -52,6 +49,5 @@ pipeline {
                 }
             }
         }
-
     }
 }
