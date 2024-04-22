@@ -38,12 +38,16 @@ pipeline {
             }
         }
 
-        stage('Check Minikube Status') {
+        stage('Deploy to Minikube') {
             steps {
-                bat "minikube status"
+                script {
+                    // Adjust this if Minikube is being run directly on Windows
+                    bat "minikube docker-env"
+                    bat "kubectl apply -f deployment.yaml"
+                }
             }
         }
-
+    }
 
     post {
         success {
