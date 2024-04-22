@@ -18,26 +18,12 @@ pipeline {
             }
         }
 
-        stage('Configure Minikube Docker Environment') {
+        stage('Build Docker Image') {
             steps {
                 script {
-                    // Retrieve environment commands from minikube docker-env and set them manually
-                    def dockerEnv = bat(script: "minikube docker-env --shell cmd", returnStdout: true).trim()
-                    dockerEnv.tokenize('\n').each {
-                        line ->
-                        if (line.startsWith("SET")) {
-                            def (key, value) = line.drop(4).split('=', 2)
-                            env."$key" = "$value".trim()
-                        }
-                    }
+                    // Ensure Docker is accessible via Windows command line
+                    bat "docker build -t ${env.DOCKER_IMAGE} ."
                 }
-            }
-        }
-
-        stage('Build Docker Image with Minikube') {
-            steps {
-                // Now the Docker commands should use Minikube's Docker daemon
-                bat "docker build -t ${env.DOCKER_IMAGE} ."
             }
         }
 
@@ -45,8 +31,8 @@ pipeline {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub_credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        bat "echo %DOCKER_PASSWORD% | docker login -u %DOCKER_USERNAME% --password-stdin"
-                        bat "docker push ${env.DOCKER_IMAGE}"
+                        bat "docker login -u %DOCKER_USERNAME% -p %DOCKER_PASSWORD%"
+                        bat "docker push ohsoroso/hello-world:latest"
                     }
                 }
             }
@@ -55,7 +41,8 @@ pipeline {
         stage('Deploy to Minikube') {
             steps {
                 script {
-                    bat "kubectl config use-context minikube"
+                    // Adjust this if Minikube is being run directly on Windows
+                    bat "minikube docker-env"
                     bat "kubectl apply -f deployment.yaml"
                 }
             }
