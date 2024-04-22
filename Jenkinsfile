@@ -18,19 +18,26 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Configure Minikube Docker Environment') {
             steps {
-                bat "docker build -t ${env.DOCKER_IMAGE} ."
+                script {
+                    // Retrieve environment commands from minikube docker-env and set them manually
+                    def dockerEnv = bat(script: "minikube docker-env --shell cmd", returnStdout: true).trim()
+                    dockerEnv.tokenize('\n').each {
+                        line ->
+                        if (line.startsWith("SET")) {
+                            def (key, value) = line.drop(4).split('=', 2)
+                            env."$key" = "$value".trim()
+                        }
+                    }
+                }
             }
         }
 
-        // New stage for building Docker image using Minikube's Docker daemon
         stage('Build Docker Image with Minikube') {
             steps {
-                script {
-                    // Execute minikube command and directly use its Docker daemon to build image
-                    bat "minikube docker-env && docker build -t ${env.DOCKER_IMAGE} ."
-                }
+                // Now the Docker commands should use Minikube's Docker daemon
+                bat "docker build -t ${env.DOCKER_IMAGE} ."
             }
         }
 
@@ -48,7 +55,7 @@ pipeline {
         stage('Deploy to Minikube') {
             steps {
                 script {
-                    bat "minikube docker-env"
+                    bat "kubectl config use-context minikube"
                     bat "kubectl apply -f deployment.yaml"
                 }
             }
