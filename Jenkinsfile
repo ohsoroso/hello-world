@@ -25,7 +25,7 @@ pipeline {
                     powershell '''
                     $Env:DOCKER_TLS_VERIFY = "1"
                     $Env:DOCKER_HOST = "tcp://127.0.0.1:58634"
-                    $Env:DOCKER_CERT_PATH = "C:/Users/notfu/.minikube/certs"
+                    $Env:DOCKER_CERT_PATH = "C:\\Users\\notfu\\.minikube\\certs"
                     $Env:MINIKUBE_ACTIVE_DOCKERD = "minikube"
                     & minikube -p minikube docker-env --shell powershell | Invoke-Expression
                     docker build -t ${env.DOCKER_IMAGE} .
