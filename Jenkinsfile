@@ -14,15 +14,14 @@ pipeline {
 
         stage('Build') {
             steps {
-                bat "mvn clean package"
+                sh 'mvn clean package'
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Ensure Docker is accessible via Windows command line
-                    bat "docker build -t ${env.DOCKER_IMAGE} ."
+                    sh "docker build -t ${env.DOCKER_IMAGE} ."
                 }
             }
         }
@@ -31,8 +30,10 @@ pipeline {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub_credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        bat "bat "docker login -u %DOCKER_USERNAME% -p %DOCKER_PASSWORD%""
-                        bat "docker push ohsoroso/hello-world:latest"
+                        sh """
+                        echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin registry.hub.docker.com
+                        docker push ${env.DOCKER_IMAGE}
+                        """
                     }
                 }
             }
@@ -41,9 +42,10 @@ pipeline {
         stage('Deploy to Minikube') {
             steps {
                 script {
-                    // Adjust this if Minikube is being run directly on Windows
-                    bat "minikube docker-env"
-                    bat "kubectl apply -f deployment.yaml"
+                    sh '''
+                    eval $(minikube -p minikube docker-env)
+                    kubectl apply -f deployment.yaml
+                    '''
                 }
             }
         }
