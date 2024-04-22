@@ -41,12 +41,17 @@ pipeline {
         stage('Deploy to Minikube') {
             steps {
                 script {
-                    // Configure Docker to use Minikube
-                    bat "minikube -p minikube docker-env --shell powershell | Invoke-Expression"
-                    // Deploy application
-                    bat "kubectl apply -f deployment.yaml"
+                    // Store the Docker environment configuration script from Minikube in a variable
+                    bat script: 'minikube -p minikube docker-env --shell powershell > minikube_docker_env.ps1', returnStdout: false
+
+                    // Execute the Docker environment configuration script
+                    bat 'powershell -File minikube_docker_env.ps1'
+
+                    // Apply the Kubernetes configuration
+                    bat 'kubectl apply -f deployment.yaml'
                 }
             }
         }
+
     }
 }
