@@ -31,8 +31,8 @@ pipeline {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub_credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        bat "echo %DOCKER_PASSWORD%| docker login -u %DOCKER_USERNAME% --password-stdin registry.hub.docker.com"
-                        bat "docker push ${env.DOCKER_IMAGE}"
+                        bat "echo %DOCKER_PASSWORD% | docker login -u %DOCKER_USERNAME% --password-stdin"
+                        bat "docker push ohsoroso/hello-world:latest"
                     }
                 }
             }
