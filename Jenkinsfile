@@ -41,15 +41,11 @@ pipeline {
         stage('Deploy to Minikube') {
             steps {
                 script {
-                    powershell script: """
+                    // Using PowerShell to execute the Docker environment command for Minikube
+                    powershell """
                         \$minikubeDockerEnv = minikube -p minikube docker-env --shell powershell
-                        if (\$minikubeDockerEnv -eq 'false' -or \$minikubeDockerEnv -eq \$null) {
-                            Write-Error 'Failed to get Minikube Docker environment settings.'
-                            exit 1
-                        } else {
-                            Invoke-Expression \$minikubeDockerEnv
-                            kubectl apply -f deployment.yaml
-                        }
+                        Invoke-Expression \$minikubeDockerEnv
+                        kubectl apply -f deployment.yaml
                     """
                 }
             }
