@@ -14,14 +14,14 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'mvn clean package'
+                bat "wsl mvn clean package"
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 script {
-                    sh "docker build -t ${env.DOCKER_IMAGE} ."
+                    bat "wsl docker build -t ${env.DOCKER_IMAGE} ."
                 }
             }
         }
@@ -30,10 +30,7 @@ pipeline {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub_credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        sh """
-                        echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin registry.hub.docker.com
-                        docker push ${env.DOCKER_IMAGE}
-                        """
+                        bat "wsl bash -c 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin registry.hub.docker.com && docker push ${env.DOCKER_IMAGE}'"
                     }
                 }
             }
@@ -42,10 +39,7 @@ pipeline {
         stage('Deploy to Minikube') {
             steps {
                 script {
-                    sh '''
-                    eval $(minikube -p minikube docker-env)
-                    kubectl apply -f deployment.yaml
-                    '''
+                    bat "wsl kubectl apply -f C:\Users\notfu\IdeaProjects\helloWorld\deployment.yaml"
                 }
             }
         }
