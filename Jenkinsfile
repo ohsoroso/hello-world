@@ -43,8 +43,6 @@ pipeline {
             steps {
                 script {
                     // Ensure commands are separated properly
-                    bat "minikube -p minikube docker-env --shell cmd > minikube_docker_env.bat"
-                    bat "call minikube_docker_env.bat"
                     bat "kubectl apply -f deployment.yaml"
                 }
             }
