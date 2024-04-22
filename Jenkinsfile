@@ -6,27 +6,6 @@ pipeline {
     }
 
     stages {
-
-    stage('Some PowerShell Stage') {
-        steps {
-            script {
-                // Setting the execution policy for this process only
-                powershell script: """
-                    Set-ExecutionPolicy -Scope Process -ExecutionPolicy Unrestricted -Force
-                    # Your PowerShell commands here
-                    \$minikubeDockerEnv = minikube -p minikube docker-env --shell powershell
-                    if (\$minikubeDockerEnv -match 'false') {
-                        Write-Error 'Failed to get Docker environment settings'
-                        exit 1
-                    }
-                    Invoke-Expression \$minikubeDockerEnv
-                    kubectl apply -f deployment.yaml
-                """
-            }
-        }
-    }
-
-
         stage('Checkout') {
             steps {
                 git branch: 'main', url: 'https://github.com/ohsoroso/hello-world.git'
@@ -60,16 +39,13 @@ pipeline {
         }
 
         stage('Deploy to Minikube') {
-            steps {
-                script {
-                    // Using PowerShell to execute the Docker environment command for Minikube
-                    powershell """
-                        \$minikubeDockerEnv = minikube -p minikube docker-env --shell powershell
-                        Invoke-Expression \$minikubeDockerEnv
-                        kubectl apply -f deployment.yaml
-                    """
+                    steps {
+                        script {
+                            bat "minikube -p minikube docker-env --shell cmd > minikube_docker_env.bat"
+                            bat "call minikube_docker_env.bat"
+                            bat "kubectl apply -f deployment.yaml"
+                        }
+                    }
                 }
-            }
-        }
     }
 }
