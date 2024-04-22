@@ -32,30 +32,21 @@ pipeline {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub_credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                         bat "docker login -u %DOCKER_USERNAME% -p %DOCKER_PASSWORD%"
-                        bat "docker push ohsoroso/hello-world:latest"
+                        bat "docker push ${env.DOCKER_IMAGE}"
                     }
                 }
             }
         }
 
         stage('Deploy to Minikube') {
-                    steps {
-                        script {
-                            powershell """
-                            & minikube -p minikube docker-env --shell powershell | Invoke-Expression
-                            kubectl apply -f deployment.yaml
-                            """
-                        }
-                    }
+            steps {
+                script {
+                    // Configure Docker to use Minikube
+                    bat "minikube -p minikube docker-env --shell powershell | Invoke-Expression"
+                    // Deploy application
+                    bat "kubectl apply -f deployment.yaml"
                 }
             }
-
-    post {
-        success {
-            echo 'Pipeline successfully executed!'
-        }
-        failure {
-            echo 'Pipeline failed.'
         }
     }
 }
