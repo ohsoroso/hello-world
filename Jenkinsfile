@@ -39,15 +39,16 @@ pipeline {
         }
 
         stage('Deploy to Minikube') {
-            steps {
-                script {
-                    // Adjust this if Minikube is being run directly on Windows
-                    bat "minikube docker-env"
-                    bat "kubectl apply -f deployment.yaml"
+                    steps {
+                        script {
+                            powershell """
+                            & minikube -p minikube docker-env --shell powershell | Invoke-Expression
+                            kubectl apply -f deployment.yaml
+                            """
+                        }
+                    }
                 }
             }
-        }
-    }
 
     post {
         success {
