@@ -45,7 +45,7 @@ pipeline {
                     bat 'powershell -ExecutionPolicy Bypass -File minikube_docker_env.ps1'
 
                     // Apply the Kubernetes configuration
-                    bat 'kubectl apply -f deployment.yaml'
+                    bat 'kubectl apply -f deployment.yaml --validate=false'
                 }
             }
         }
