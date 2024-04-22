@@ -1,28 +1,25 @@
 pipeline {
-    agent any // Run on any available agent
+    agent any
 
     environment {
         DOCKER_IMAGE = 'ohsoroso/hello-world:latest'
-        // Ensure you replace 'yourdockerhubusername' with your actual Docker Hub username or your private registry URL
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/ohsoroso/hello-world.git' // Replace with your repository URL
+                git branch: 'main', url: 'https://github.com/ohsoroso/hello-world.git'
             }
         }
 
         stage('Build') {
             steps {
-                // Using Maven to build the Java project
                 sh 'mvn clean package'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                // Building Docker image
                 script {
                     docker.build("${DOCKER_IMAGE}")
                 }
@@ -42,9 +39,7 @@ pipeline {
         stage('Deploy to Minikube') {
             steps {
                 script {
-                    // Commands to set up environment to use Minikube’s Docker daemon
                     sh 'eval $(minikube -p minikube docker-env)'
-                    // Commands to deploy to Kubernetes
                     sh 'kubectl apply -f deployment.yaml'
                 }
             }
