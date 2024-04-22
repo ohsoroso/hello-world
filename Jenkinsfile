@@ -31,8 +31,8 @@ pipeline {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub_credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        bat "docker login -u %DOCKER_USERNAME% -p %DOCKER_PASSWORD%"
-                        bat "docker push ${env.DOCKER_IMAGE}"
+                        bat "bat "docker login -u %DOCKER_USERNAME% -p %DOCKER_PASSWORD%""
+                        bat "docker push ohsoroso/hello-world:latest"
                     }
                 }
             }
@@ -41,17 +41,20 @@ pipeline {
         stage('Deploy to Minikube') {
             steps {
                 script {
-                    // Fetch and execute the Docker environment setup for Minikube
-                    bat script: 'minikube -p minikube docker-env --shell powershell > minikube_docker_env.ps1', returnStdout: false
-                    bat 'powershell -ExecutionPolicy Bypass -File minikube_docker_env.ps1'
-
-                    // Ensure kubectl is using the Minikube context
-                    bat 'kubectl config use-context minikube'
-
-                    // Apply the Kubernetes configuration
-                    bat 'kubectl apply -f deployment.yaml'
+                    // Adjust this if Minikube is being run directly on Windows
+                    bat "minikube docker-env"
+                    bat "kubectl apply -f deployment.yaml"
                 }
             }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline successfully executed!'
+        }
+        failure {
+            echo 'Pipeline failed.'
         }
     }
 }
