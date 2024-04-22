@@ -41,11 +41,10 @@ pipeline {
         stage('Deploy to Minikube') {
             steps {
                 script {
-                    // Temporarily change the execution policy and run the script
-                    bat 'powershell -ExecutionPolicy Bypass -File minikube_docker_env.ps1'
-
-                    // Apply the Kubernetes configuration
-                    bat 'kubectl apply -f deployment.yaml --validate=false'
+                    // Configure Docker to use Minikube
+                    bat "minikube -p minikube docker-env --shell powershell | Invoke-Expression"
+                    // Deploy application
+                    bat "kubectl apply -f deployment.yaml"
                 }
             }
         }
