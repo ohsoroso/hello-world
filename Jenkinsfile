@@ -39,7 +39,7 @@ pipeline {
         stage('Deploy to Minikube') {
             steps {
                 script {
-                    bat "wsl kubectl apply -f C:\Users\notfu\IdeaProjects\helloWorld\deployment.yaml"
+                    bat "wsl kubectl apply -f /mnt/c/Users/notfu/IdeaProjects/helloWorld/deployment.yaml"
                 }
             }
         }
