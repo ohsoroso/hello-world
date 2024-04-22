@@ -13,15 +13,6 @@ pipeline {
             }
         }
 
-        stage('Setup Docker Environment') {
-            steps {
-                script {
-                    // Generate the Docker environment setup batch file
-                    bat "minikube -p minikube docker-env --shell cmd > minikube_docker_env.bat"
-                }
-            }
-        }
-
         stage('Build') {
             steps {
                 bat "mvn clean package"
@@ -31,9 +22,6 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Apply the Docker environment settings
-                    bat "call minikube_docker_env.bat"
-                    // Build the Docker image using the Docker daemon in Minikube
                     bat "docker build -t ${env.DOCKER_IMAGE} ."
                 }
             }
@@ -42,9 +30,8 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 script {
-                    // Apply the Docker environment settings again
-                    bat "call minikube_docker_env.bat"
                     withCredentials([usernamePassword(credentialsId: 'dockerhub_credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        // Ensure there's a newline or separate the commands properly
                         bat "docker login -u %DOCKER_USERNAME% -p %DOCKER_PASSWORD%"
                         bat "docker push ${env.DOCKER_IMAGE}"
                     }
@@ -55,9 +42,9 @@ pipeline {
         stage('Deploy to Minikube') {
             steps {
                 script {
-                    // Apply the Docker environment settings once more
+                    // Ensure commands are separated properly
+                    bat "minikube -p minikube docker-env --shell cmd > minikube_docker_env.bat"
                     bat "call minikube_docker_env.bat"
-                    // Use kubectl to apply your deployment
                     bat "kubectl apply -f deployment.yaml"
                 }
             }
