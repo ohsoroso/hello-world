@@ -45,6 +45,9 @@ pipeline {
                     bat script: 'minikube -p minikube docker-env --shell powershell > minikube_docker_env.ps1', returnStdout: false
                     bat 'powershell -ExecutionPolicy Bypass -File minikube_docker_env.ps1'
 
+                    // Ensure kubectl is using the Minikube context
+                    bat 'kubectl config use-context minikube'
+
                     // Apply the Kubernetes configuration
                     bat 'kubectl apply -f deployment.yaml'
                 }
